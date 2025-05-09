@@ -29,7 +29,7 @@ jobs:
 
       # 5. Анализ безопасности (Bandit)
       - name: Run Bandit
-        run: bandit -r .
+        run: bandit -r . -c .bandit
 
       # 6. Запуск тестов с покрытием
       - name: Run tests with coverage
