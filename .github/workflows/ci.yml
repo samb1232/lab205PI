@@ -1,0 +1,63 @@
+name: Python CI/CD
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Загрузка кода
+      - uses: actions/checkout@v4
+
+      # 2. Настройка Python
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: "requirements.txt"
+
+      # 3. Установка зависимостей с кэшированием
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4. Проверка стиля кода (Pylint)
+      - name: Run Pylint
+        run: |
+          pylint --exit-zero main.py tests/
+
+      # 5. Анализ безопасности (Bandit)
+      - name: Run Bandit
+        run: bandit -r .
+
+      # 6. Запуск тестов с покрытием
+      - name: Run tests with coverage
+        run: |
+          python -m pytest --cov=. --cov-report=xml tests/
+
+  sonarqube:
+    name: SonarQube Analysis
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.python.bandit.reportPaths=bandit.json
+            -Dsonar.python.pylint.reportPaths=pylint_report.txt
