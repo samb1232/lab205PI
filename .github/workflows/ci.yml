@@ -34,7 +34,7 @@ jobs:
       # 6. Запуск тестов с покрытием
       - name: Run tests with coverage
         run: |
-          python -m pytest --cov=. --cov-report=xml tests/
+          python -m pytest tests/
 
   sonarqube:
     name: SonarQube Analysis
