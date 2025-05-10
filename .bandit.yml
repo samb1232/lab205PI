@@ -1,3 +1,11 @@
+# bandit.yml
 exclude_dirs:
   - tests
-skips: B101
+  - venv
+  - .github
+
+skip:
+  - B101 # Skip assert used checks
+
+targets:
+  - .
